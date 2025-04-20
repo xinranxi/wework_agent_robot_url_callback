@@ -13,8 +13,8 @@
 
 1. 克隆仓库
    ```
-   git clone https://github.com/yourusername/wework_api_callback.git
-   cd wework_api_callback
+   git clone https://github.com/varequan/wework_n8n_url_callback
+   cd wework_n8n_url_callback
    ```
 
 2. 安装依赖
