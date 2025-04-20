@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  wework-callback:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./config.yaml:/app/config.yaml
+    # Alternatively, use environment variables
+    # environment:
+    #   - WEWORK_CORP_ID=your_corp_id
+    #   - WEWORK_AGENT_1000001_TOKEN=token_for_agent_1
+    #   - WEWORK_AGENT_1000001_AES_KEY=encoding_aes_key_for_agent_1
+    #   - WEWORK_AGENT_1000001_SECRET=secret_for_agent_1
+    #   - WEWORK_AGENT_1000001_WEBHOOK=https://n8n.example.com/webhook/wework-app1
+    restart: unless-stopped 

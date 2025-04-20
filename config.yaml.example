@@ -1,0 +1,23 @@
+# 企业微信 API 回调配置示例文件
+# 复制此文件为 config.yaml 并填写相应配置
+
+# 企业微信 企业ID
+corp_id: "your_corp_id"
+
+# 不同应用的配置
+agents:
+  # 应用1配置
+  - agent_id: "1000001"
+    token: "token_for_agent_1"
+    encoding_aes_key: "encoding_aes_key_for_agent_1"
+    secret: "secret_for_agent_1"
+    webhook_url: "https://n8n.example.com/webhook/wework-app1"
+  
+  # 应用2配置
+  - agent_id: "1000002"
+    token: "token_for_agent_2"
+    encoding_aes_key: "encoding_aes_key_for_agent_2"
+    secret: "secret_for_agent_2"
+    webhook_url: "https://n8n.example.com/webhook/wework-app2"
+
+  # 可以添加更多应用配置... 
