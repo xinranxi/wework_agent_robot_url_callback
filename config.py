@@ -80,3 +80,59 @@ def get_access_token(agent_config, corp_id):
     # This would need additional implementation to actually fetch the token
     # from WeWork APIs using the agent's secret
     pass 
+
+
+def load_robot_config():
+    """
+    Load robot configuration from file or environment variables.
+    This method is independent from load_config and specifically handles robot configurations.
+    """
+    config_file_path = os.environ.get('CONFIG_FILE', 'config.yaml')
+    robots = []
+
+    if os.path.exists(config_file_path):
+        try:
+            if config_file_path.endswith(('.yaml', '.yml')):
+                with open(config_file_path, 'r', encoding='utf-8') as f:
+                    config = yaml.safe_load(f)
+                    if 'robot' in config:
+                        robots = config['robot']
+                        logger.info(f"Robot configurations loaded from file: {config_file_path}")
+                    else:
+                        logger.warning("No 'robot' section found in config file")
+        except Exception as e:
+            logger.error(f"Error loading robot configuration file: {str(e)}")
+    else:
+        logger.info(f"Config file not found: {config_file_path}. Trying environment variables for robot configurations.")
+        try:
+            # Load robot configurations from environment
+            # Format: WEWORK_ROBOT_{id}_TOKEN, WEWORK_ROBOT_{id}_AES_KEY, WEWORK_ROBOT_{id}_WEBHOOK
+            robot_ids = set()
+
+            for key in os.environ:
+                if key.startswith('WEWORK_ROBOT_') and '_TOKEN' in key:
+                    robot_id = key.split('_TOKEN')[0].replace('WEWORK_ROBOT_', '')
+                    robot_ids.add(robot_id)
+
+            for robot_id in robot_ids:
+                token_key = f'WEWORK_ROBOT_{robot_id}_TOKEN'
+                aes_key = f'WEWORK_ROBOT_{robot_id}_AES_KEY'
+                webhook_key = f'WEWORK_ROBOT_{robot_id}_WEBHOOK'
+
+                if token_key in os.environ and aes_key in os.environ:
+                    robot_config = {
+                        'robot_id': robot_id,
+                        'token': os.environ[token_key],
+                        'encoding_aes_key': os.environ[aes_key],
+                        'webhook_url': os.environ.get(webhook_key, ''),
+                    }
+                    robots.append(robot_config)
+                    logger.info(f"Loaded configuration for robot: {robot_id}")
+
+            if not robots:
+                logger.warning("No robot configurations found in environment variables")
+
+        except Exception as e:
+            logger.error(f"Error loading robot configuration from environment: {str(e)}")
+
+    return robots

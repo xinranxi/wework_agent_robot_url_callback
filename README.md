@@ -39,6 +39,11 @@
      - `encoding_aes_key`: 用于消息解密的 EncodingAESKey
      - `secret`: 应用的 Secret
      - `webhook_url`: 要转发到的 n8n webhook URL
+   - 为每个机器人配置以下信息：
+     - `robot_id`: 自定义机器人ID
+     - `token`: 用于回调验证的 Token
+     - `encoding_aes_key`: 用于消息解密的 EncodingAESKey
+     - `webhook_url`: 要转发到的 n8n webhook URL
 
 ### 通过环境变量配置
 
@@ -50,6 +55,10 @@
   - `WEWORK_AGENT_{id}_AES_KEY`: 应用的 EncodingAESKey
   - `WEWORK_AGENT_{id}_SECRET`: 应用的 Secret
   - `WEWORK_AGENT_{id}_WEBHOOK`: 应用对应的 n8n webhook URL
+- 对于每个机器人，添加以下环境变量（将 `{id}` 替换为机器人ID）：
+  - `WEWORK_ROBOT_{id}_TOKEN`: 机器人的 Token
+  - `WEWORK_ROBOT_{id}_AES_KEY`: 机器人的 EncodingAESKey
+  - `WEWORK_ROBOT_{id}_WEBHOOK`: 机器人对应的 n8n webhook URL
 
 例如，对于 agent_id 为 1000001 的应用，环境变量应该是：
 ```
@@ -83,6 +92,7 @@ gunicorn -w 4 -b 0.0.0.0:5000 app:app
 1. 在企业微信管理后台创建自建应用
 2. 在应用的"接收消息"设置中，填写：
    - URL：`http://your-server.com/wework/callback/{agent_id}`（替换 {agent_id} 为实际的应用ID）
+   - 智能机器人URL:`http://your-server.com/wework/robot_callback/{robot_id}`（替换 {robot_id} 为实际的自定义的机器人ID）
    - Token：与配置中的 Token 保持一致
    - EncodingAESKey：与配置中的 encoding_aes_key 保持一致
 3. 勾选需要接收的消息类型
@@ -108,4 +118,4 @@ gunicorn -w 4 -b 0.0.0.0:5000 app:app
 
 ## 许可证
 
-MIT 
+MIT

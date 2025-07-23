@@ -20,4 +20,13 @@ agents:
     secret: "secret_for_agent_2"
     webhook_url: "https://n8n.example.com/webhook/wework-app2"
 
-  # 可以添加更多应用配置... 
+  # 机器人配置
+  robot:
+  - robot_id: "自定义机器人ID"
+    token: "token_for_robot"
+    encoding_aes_key: "encoding_aes_key_for_robot"
+    webhook_url: "http://n8n.example.com/webhook/wework-robot"
+  # 可以添加更多应用配置...
+
+
+  # 可以添加更多应用配置...
