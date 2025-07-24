@@ -1,11 +1,11 @@
 # 企业微信 API 回调服务
 
-这是一个基于 Python 的企业微信 API 回调服务，可以接收企业微信的消息并转发到 n8n 的 webhook。
+这是一个基于 Python 的企业微信 API 回调服务，可以接收企业微信的消息并转发到 n8n(其他平台未测试) 的 webhook。
 
 ## 功能特点
 
 - 支持配置多个企业微信应用（AgentId）
-- 根据不同的 AgentId 转发到不同的 n8n webhook
+- 根据不同的 AgentId 转发到不同的 n8n(其他平台未测试) webhook
 - 支持通过配置文件或环境变量进行配置
 - 实现企业微信回调消息的验证和解密
 
@@ -97,9 +97,9 @@ gunicorn -w 4 -b 0.0.0.0:5000 app:app
    - EncodingAESKey：与配置中的 encoding_aes_key 保持一致
 3. 勾选需要接收的消息类型
 
-## 转发到 n8n
+## 转发到 webhook
 
-消息会以 JSON 格式转发到配置的 n8n webhook，格式为：
+消息会以 JSON 格式转发到配置的 n8n(其他平台未测试)webhook，格式为：
 
 ```json
 {
