@@ -202,6 +202,25 @@ def get_agent_config(agent_id):
             return agent_config
     return None
 
+def make_error_message(encoding_aes_key,content):
+    pc = Prpcrypt(encoding_aes_key)
+    error_json = {
+        "msgtype": 'stream',
+        "stream": {
+            "id": "STREAMID",
+            "finish": True,
+            "content": content
+        }
+    }
+    logger.info(f"{json.dumps(error_json)}")
+    error_encrypt = pc.encrypt(json.dumps(error_json, ensure_ascii=False))
+    error_encrypt = error_encrypt.decode('utf-8')
+    error_message = {
+        "encrypt": error_encrypt
+    }
+    return json.dumps(error_message)
+
+
 
 @app.route('/wework/robot_callback/<robot_id>', methods=['GET', 'POST'])
 def wework_robot_callback(robot_id):
@@ -215,6 +234,9 @@ def wework_robot_callback(robot_id):
     Returns:
         Flask响应对象
         Flask response object"""
+
+
+
     robot_config = get_robot_config(robot_id)
 
     if not robot_config:
@@ -224,7 +246,6 @@ def wework_robot_callback(robot_id):
     token = robot_config.get('token')
     encoding_aes_key = robot_config.get('encoding_aes_key')
     webhook_url = robot_config.get('webhook_url')
-
     # Store original request info for subsequent n8n reply
     # Handle verification request (GET)
     if request.method == 'GET':
@@ -256,7 +277,6 @@ def wework_robot_callback(robot_id):
     # Handle message reception (POST)
     elif request.method == 'POST':
         try:
-            print(request.args)
             msg_signature = request.args.get('msg_signature')
             timestamp = request.args.get('timestamp')
             nonce = request.args.get('nonce')
@@ -295,6 +315,7 @@ def wework_robot_callback(robot_id):
                 logger.error(f"Decryption failed: {str(e)}")
                 return make_response("Decryption failed", 500)
             if message_data.get("msgid") in robot_message_set:
+                logger.error(f"too many requests failed")
                 return make_response("too many requests failed", 500)
             else:
                 robot_message_set.add(message_data.get('msgid'))
@@ -318,8 +339,9 @@ def wework_robot_callback(robot_id):
                         webhook_url,
                         json=formatted_message,
                         headers={'Content-Type': 'application/json'},
-                        timeout=8
+                        timeout=3
                     )
+                    logger.info(f"{response.json()}")
                     pc = Prpcrypt(encoding_aes_key)
                     msg_encrypt=pc.encrypt(json.dumps(response.json(),ensure_ascii=False))
                     msg_encrypt =msg_encrypt.decode('utf-8')
@@ -328,20 +350,20 @@ def wework_robot_callback(robot_id):
                     }
                     logger.info(f"Forwarded to robot webhook, status: {response.status_code}")
                     try:
+                        robot_message_set.clear()
                         return make_response(json.dumps(response_message), 200)
                     except Exception as e:
                         logger.error(f"Failed response to wework: {str(e)}")
+                        return make_response(json.dumps( make_error_message), 200)
                 except Exception as e:
                     logger.error(f"Failed to forward to robot webhook: {str(e)}")
-                return make_response("success", 200)
+                    return make_response( make_error_message(encoding_aes_key,f"错误:{str(e)}"), 200)
             else:
-                # No webhook configured, return error
-                return make_response("Webhook not configured", 500)
-
+                return make_response(make_error_message(encoding_aes_key, "Webhook not configured", 200))
         except Exception as e:
             logger.error(f"Error processing robot callback: {str(e)}")
-            return make_response("Internal server error", 500)
-    return None
+            return make_response( make_error_message(encoding_aes_key,f"错误:{str(e)}"), 200)
+    return make_response( make_error_message(encoding_aes_key,"未知错误", 200))
 
 
 @app.route('/wework/callback/<agent_id>', methods=['GET', 'POST'])
